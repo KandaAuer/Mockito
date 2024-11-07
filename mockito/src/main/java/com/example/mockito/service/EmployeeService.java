@@ -1,54 +1,51 @@
 package com.example.mockito.service;
 
-import com.example.mockito.model.Employee;
 import org.springframework.stereotype.Service;
+import com.example.mockito.exception.EmployeeAlreadyAddException;
+import com.example.mockito.exception.EmployeeNotFoundException;
+import com.example.mockito.exception.EmployeeStorageIsFullException;
+import com.example.mockito.model.Employee;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import static org.apache.tomcat.util.IntrospectionUtils.capitalize;
 
 @Service
 public class EmployeeService {
-    private final List<Employee> employees = new ArrayList<>();
-
-    public EmployeeService() {
-        employees.add(new Employee("Канда", "Ауэр", 50000, 1));
-        employees.add(new Employee("Юлия", "Тарасюк", 55000, 1));
-        employees.add(new Employee("Илья", "Яровой", 60000, 2));
-        employees.add(new Employee("Наталья", "Громова", 45000, 2));
-        employees.add(new Employee("Алексей", "Попов", 70000, 3));
+    private static int SIZE = 10;
+    private final Map<String, Employee> employees = new HashMap<>();
+    public void addEmployee(String firstName, String lastName, double salary, int deportmentId) {
+        if (employees.size() == SIZE) {
+            throw new EmployeeStorageIsFullException();
         }
-
-    public List<Employee> getEmployeesByDepartment(int departmentId) {
-        return employees.stream()
-                .filter(employee -> employee.getDepartmentId() == departmentId)
-                .collect(Collectors.toList());
+        var key = makeKey(firstName, lastName);
+        if (employees.containsKey(key)) {
+            throw new EmployeeAlreadyAddException();
+        }
+        employees.put(key, new Employee(capitalize(firstName),
+                capitalize(lastName),
+                salary,
+                deportmentId));
     }
-
-    public int getSumOfSalariesByDepartment(int departmentId) {
-        return employees.stream()
-                .filter(employee -> employee.getDepartmentId() == departmentId)
-                .mapToInt(Employee::getSalary)
-                .sum();
+    public Employee findEmployee(String firstName, String lastName) {
+        var emp = employees.get(makeKey(firstName, lastName));
+        if (emp == null) {
+            throw new EmployeeNotFoundException("Сотрудник отсутствует!");
+        }
+        return emp;
     }
-
-    public Optional<Employee> getMaxSalaryEmployeeByDepartment(int departmentId) {
-        return employees.stream()
-                .filter(employee -> employee.getDepartmentId() == departmentId)
-                .max(Comparator.comparingInt(Employee::getSalary));
+    public Boolean removeEmployee(String firstName, String lastName) {
+        Employee removed = employees.remove(makeKey(firstName, lastName));
+        if (removed == null) {
+            throw new EmployeeNotFoundException("Сотрудник отсутствует!");
+        }
+        return true;
     }
-
-    public Optional<Employee> getMinSalaryEmployeeByDepartment(int departmentId) {
-        return employees.stream()
-                .filter(employee -> employee.getDepartmentId() == departmentId)
-                .min(Comparator.comparingInt(Employee::getSalary));
+    public Collection<Employee> getAll() {
+        return employees.values();
     }
-
-    public List<Employee> getAllEmployees() {
-        return new ArrayList<>(employees);
-    }
-
-    public Map<Integer, List<Employee>> getAllEmployeesGroupedByDepartment() {
-        return employees.stream()
-                .collect(Collectors.groupingBy(Employee::getDepartmentId));
+    private String makeKey(String firstName, String lastName) {
+        return (firstName + " " + lastName).toLowerCase();
     }
 }

@@ -1,28 +1,47 @@
 package com.example.mockito.model;
 
+import java.util.Objects;
 public class Employee {
-    private String firstName;  // Имя
-    private String lastName;   // Фамилия
-    private int salary;        // Зарплата
-    private int departmentId;  // Идентификатор департамента
-
-    public Employee(String firstName, String lastName, int salary, int departmentId) {
+    private final String firstName;
+    private final String lastName;
+    private final double salary;
+    private final int department;
+    public Employee(String firstName, String lastName, Double salary, int department) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.salary = salary;
-        this.departmentId = departmentId;
+        this.department = department;
     }
-
-    // Геттеры и сеттеры
-    public String getFirstName() { return firstName; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-
-    public String getLastName() { return lastName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
-
-    public int getSalary() { return salary; }
-    public void setSalary(int salary) { this.salary = salary; }
-
-    public int getDepartmentId() { return departmentId; }
-    public void setDepartmentId(int departmentId) { this.departmentId = departmentId; }
+    public String getFirstName() {
+        return firstName;
+    }
+    public String getLastName() {
+        return lastName;
+    }
+    public Double getSalary() {
+        return salary;
+    }
+    public int getDepartment() {
+        return department;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Employee employee = (Employee) o;
+        return Objects.equals(firstName, employee.firstName) && Objects.equals(lastName, employee.lastName);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, lastName);
+    }
+    @Override
+    public String toString() {
+        return "{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", salary=" + salary +
+                ", department=" + department +
+                '}';
+    }
 }

@@ -1,45 +1,46 @@
 package com.example.mockito.controller;
 
+
+import com.example.mockito.exception.EmployeeNotFoundException;
 import com.example.mockito.model.Employee;
-import com.example.mockito.service.EmployeeService;
-import org.springframework.web.bind.annotation.*;
+import com.example.mockito.service.DepartmentService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/department")
 public class DepartmentController {
-
-    private final EmployeeService employeeService;
-
-    public DepartmentController(EmployeeService employeeService) {
-        this.employeeService = employeeService;
+    private final DepartmentService service;
+    public DepartmentController(DepartmentService service) {
+        this.service = service;
     }
-
-    @GetMapping("/{id}/employees")
-    public List<Employee> getEmployeesByDepartment(@PathVariable int id) {
-        return employeeService.getEmployeesByDepartment(id);
+    @GetMapping("{deptId}/salary/sum")
+    public double sumByDept(@PathVariable int deptId) {
+        return service.sum(deptId);
     }
-
-    @GetMapping("/{id}/salary/sum")
-    public int getSumOfSalariesByDepartment(@PathVariable int id) {
-        return employeeService.getSumOfSalariesByDepartment(id);
+    @GetMapping("{deptId}/salary/max")
+    public double max(@PathVariable int deptId) {
+        return service.maxSalary(deptId);
     }
-
-    @GetMapping("/{id}/salary/max")
-    public Optional<Employee> getMaxSalaryEmployeeByDepartment(@PathVariable int id) {
-        return employeeService.getMaxSalaryEmployeeByDepartment(id);
+    @GetMapping("{deptId}/salary/min")
+    public String min(@PathVariable int deptId) {
+        try {
+            return "" + service.minSalary(deptId);
+        } catch (EmployeeNotFoundException e) {
+            return e.getMessage();
+        }
     }
-
-    @GetMapping("/{id}/salary/min")
-    public Optional<Employee> getMinSalaryEmployeeByDepartment(@PathVariable int id) {
-        return employeeService.getMinSalaryEmployeeByDepartment(id);
+    @GetMapping("{deptId}/employees")
+    public List<Employee> find(@PathVariable int deptId) {
+        return service.findAllByDept(deptId);
     }
-
     @GetMapping("/employees")
-    public Map<Integer, List<Employee>> getAllEmployeesGroupedByDepartment() {
-        return employeeService.getAllEmployeesGroupedByDepartment();
+    public Map<Integer, List<Employee>> group() {
+        return service.groupDeDept();
     }
 }
